@@ -1,12 +1,16 @@
 package model.entities;
 
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public class Movie {
     private Integer id;
     private String tittle;
     private String director;
+
+    Set<Type> types = new HashSet<>();
 
     public Movie(){
     }
@@ -40,6 +44,10 @@ public class Movie {
         this.director = director;
     }
 
+    public Set<Type> getTypes() {
+        return types;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -52,6 +60,7 @@ public class Movie {
     public int hashCode() {
         return Objects.hash(id, tittle);
     }
+
 
     @Override
     public String toString() {

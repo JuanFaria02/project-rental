@@ -5,9 +5,7 @@ import com.mysql.cj.jdbc.ConnectionImpl;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Properties;
 
 public class DB {
@@ -44,6 +42,23 @@ public class DB {
             return props;
         }
         catch (IOException e) {
+            throw new DbException(e.getMessage());
+        }
+    }
+
+    public static void closeStatement(Statement st) {
+        try {
+            st.close();
+        }
+        catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        }
+    }
+    public static void closeResultSet(ResultSet rs) {
+        try {
+            rs.close();
+        }
+        catch (SQLException e) {
             throw new DbException(e.getMessage());
         }
     }

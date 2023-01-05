@@ -1,9 +1,10 @@
 package model.entities;
 
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Client {
+public class Client implements Serializable {
     private Integer id;
     private String cpf;
     private String name;

@@ -7,6 +7,7 @@ import model.dao.DaoFactory;
 import model.entities.Client;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ClientDaoJdbc implements ClientDao {
@@ -58,22 +59,72 @@ public class ClientDaoJdbc implements ClientDao {
             throw new DbException(e.getMessage());
         }
         finally {
-
+            DB.closeStatement(st);
         }
     }
 
     @Override
     public void deleteById(Integer id) {
-        
+        PreparedStatement st = null;
+        try {
+            st = connection.prepareStatement("DELETE FROM tb_client " +
+                    "WHERE Id = ?");
+            st.setInt(1, id);
+            int result = st.executeUpdate();
+        }
+        catch (SQLException e){
+            throw new DbException(e.getMessage());
+        }
+        finally {
+            DB.closeStatement(st);
+        }
     }
 
     @Override
     public Client findById(Integer id) {
+        ResultSet rs = null;
+        PreparedStatement st = null;
+        try{
+            st = connection.prepareStatement("SELECT * FROM tb_client " +
+                    "WHERE Id = ?");
+            st.setInt(1, id);
+            rs = st.executeQuery();
+            if (rs.next()){
+                Client client = new Client(rs.getString(2), rs.getString(3));
+                client.setId(rs.getInt(1));
+                return client;
+            }
+        }
+        catch (SQLException e){
+            throw new DbException(e.getMessage());
+        }
+        finally {
+            DB.closeStatement(st);
+            DB.closeResultSet(rs);
+        }
         return null;
     }
 
     @Override
     public List<Client> findAll() {
-        return null;
+        ResultSet rs = null;
+        PreparedStatement st = null;
+
+        try {
+            st = connection.prepareStatement("SELECT * FROM " +
+                    "tb_client");
+            rs = st.executeQuery();
+            List<Client> clients = new ArrayList<>();
+            int i = 0;
+            while (rs.next()){
+                clients.add(new Client(rs.getString(2), rs.getString(3)));
+                clients.get(i).setId(rs.getInt(1));
+                i++;
+            }
+            return clients;
+        }
+        catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        }
     }
 }

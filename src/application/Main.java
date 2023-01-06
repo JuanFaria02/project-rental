@@ -6,16 +6,14 @@ import model.dao.DaoFactory;
 import model.entities.Client;
 
 import java.sql.Connection;
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
 
         ClientDao clientDao = DaoFactory.createClientDao();
 
-        Client client = new Client("4333231111", "Marcos");
-        clientDao.insert(client);
-
-
-
+        List<Client> clients = clientDao.findAll();
+        clients.forEach(System.out::println);
     }
 }

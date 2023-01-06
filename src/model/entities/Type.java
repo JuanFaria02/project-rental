@@ -8,8 +8,7 @@ public class Type {
     public Type(){
     }
 
-    public Type(Integer id, String name) {
-        this.id = id;
+    public Type(String name) {
         this.name = name;
     }
 

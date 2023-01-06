@@ -8,8 +8,7 @@ public class MovieType {
     public MovieType(){
     }
 
-    public MovieType(Integer id, Movie movie, Type type) {
-        this.id = id;
+    public MovieType(Movie movie, Type type) {
         this.movie = movie;
         this.type = type;
     }

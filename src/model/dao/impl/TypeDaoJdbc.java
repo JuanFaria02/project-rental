@@ -2,33 +2,32 @@ package model.dao.impl;
 
 import db.DB;
 import db.DbException;
-import model.dao.ClientDao;
-import model.dao.DaoFactory;
-import model.entities.Client;
+import model.dao.TypeDao;
+import model.entities.Type;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClientDaoJdbc implements ClientDao {
+public class TypeDaoJdbc implements TypeDao {
 
     private Connection connection;
-
-    public ClientDaoJdbc(Connection connection) {
+    public TypeDaoJdbc(Connection connection) {
         this.connection = connection;
     }
-
     @Override
-    public void insert(Client obj) {
+    public void insert(Type obj) {
         PreparedStatement st = null;
         ResultSet rs = null;
 
         try{
-            st = connection.prepareStatement("INSERT INTO tb_client (Cpf, Name) " +
+            st = connection.prepareStatement("INSERT INTO tb_type (name) " +
                     "VALUES " +
-                    "(?, ?)", st.RETURN_GENERATED_KEYS);
-            st.setString(1, obj.getCpf());
-            st.setString(2, obj.getName());
+                    "(?)", st.RETURN_GENERATED_KEYS);
+            st.setString(1, obj.getName());
             int result = st.executeUpdate();
             rs = st.getGeneratedKeys();
             if (rs.next()){
@@ -45,15 +44,14 @@ public class ClientDaoJdbc implements ClientDao {
     }
 
     @Override
-    public void update(Client obj) {
+    public void update(Type obj) {
         PreparedStatement st = null;
         try{
-            st = connection.prepareStatement("UPDATE tb_client " +
-                    "SET Cpf = ?, Name = ? " +
+            st = connection.prepareStatement("UPDATE tb_type " +
+                    "SET name = ? " +
                     "WHERE Id = ?");
-            st.setString(1, obj.getCpf());
-            st.setString(2, obj.getName());
-            st.setInt(3, obj.getId());
+            st.setString(1, obj.getName());
+            st.setInt(2, obj.getId());
             st.executeUpdate();
         }
         catch (SQLException e){
@@ -68,7 +66,7 @@ public class ClientDaoJdbc implements ClientDao {
     public void deleteById(Integer id) {
         PreparedStatement st = null;
         try {
-            st = connection.prepareStatement("DELETE FROM tb_client " +
+            st = connection.prepareStatement("DELETE FROM tb_type " +
                     "WHERE Id = ?");
             st.setInt(1, id);
             int result = st.executeUpdate();
@@ -82,18 +80,18 @@ public class ClientDaoJdbc implements ClientDao {
     }
 
     @Override
-    public Client findById(Integer id) {
+    public Type findById(Integer id) {
         ResultSet rs = null;
         PreparedStatement st = null;
         try{
-            st = connection.prepareStatement("SELECT * FROM tb_client " +
+            st = connection.prepareStatement("SELECT * FROM tb_type " +
                     "WHERE Id = ?");
             st.setInt(1, id);
             rs = st.executeQuery();
             if (rs.next()){
-                Client client = new Client(rs.getString(2), rs.getString(3));
-                client.setId(rs.getInt(1));
-                return client;
+                Type type = new Type(rs.getString(2));
+                type.setId(rs.getInt(1));
+                return type;
             }
         }
         catch (SQLException e){
@@ -107,25 +105,26 @@ public class ClientDaoJdbc implements ClientDao {
     }
 
     @Override
-    public List<Client> findAll() {
+    public List<Type> findAll() {
         ResultSet rs = null;
         PreparedStatement st = null;
-
         try {
             st = connection.prepareStatement("SELECT * FROM " +
-                    "tb_client");
+                    "tb_type");
             rs = st.executeQuery();
-            List<Client> clients = new ArrayList<>();
+            List<Type> types = new ArrayList<>();
             int i = 0;
             while (rs.next()){
-                clients.add(new Client(rs.getString(2), rs.getString(3)));
-                clients.get(i).setId(rs.getInt(1));
+                types.add(new Type(rs.getString(2)));
+                types.get(i).setId(rs.getInt(1));
                 i++;
             }
-            return clients;
+            return types;
         }
         catch (SQLException e) {
             throw new DbException(e.getMessage());
         }
     }
+
 }
+

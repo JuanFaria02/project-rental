@@ -4,15 +4,14 @@ import java.time.Instant;
 
 public class Media {
     private Integer id;
-    private String codeBarr;
+    private String codeBar;
     private Movie movie;
 
     public Media(){
     }
 
-    public Media(Integer id, String codeBarr, Movie movie) {
-        this.id = id;
-        this.codeBarr = codeBarr;
+    public Media(String codeBar, Movie movie) {
+        this.codeBar = codeBar;
         this.movie = movie;
     }
 
@@ -24,12 +23,12 @@ public class Media {
         this.id = id;
     }
 
-    public String getCodeBarr() {
-        return codeBarr;
+    public String getCodeBar() {
+        return codeBar;
     }
 
-    public void setCodeBarr(String codeBarr) {
-        this.codeBarr = codeBarr;
+    public void setCodeBar(String codeBar) {
+        this.codeBar = codeBar;
     }
 
     public Movie getMovie() {
@@ -44,7 +43,7 @@ public class Media {
     public String toString() {
         return "Media{" +
                 "id=" + id +
-                ", codeBarr='" + codeBarr + '\'' +
+                ", codeBarr='" + codeBar + '\'' +
                 ", movie=" + movie +
                 '}';
     }

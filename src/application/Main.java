@@ -2,10 +2,7 @@ package application;
 
 import db.DB;
 import model.dao.*;
-import model.entities.Client;
-import model.entities.Movie;
-import model.entities.MovieType;
-import model.entities.Type;
+import model.entities.*;
 
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -14,13 +11,10 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
 
-        MovieTypeDao movieTypeDao = DaoFactory.createMovieTypeDao();
         MovieDao movieDao = DaoFactory.createMovieDao();
-        TypeDao typeDao = DaoFactory.createTypeDao();
-
- 
-        List<MovieType> movieTypes = movieTypeDao.findAll();
-
-        movieTypes.forEach(System.out::println);
+        MediaDao mediaDao = DaoFactory.createMediaDao();
+        Media media = new Media("78643", movieDao.findById(1));
+        media.setId(1);
+        mediaDao.update(media);
     }
 }

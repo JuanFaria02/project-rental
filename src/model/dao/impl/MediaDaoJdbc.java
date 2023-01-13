@@ -2,13 +2,16 @@ package model.dao.impl;
 
 import db.DB;
 import db.DbException;
+import model.dao.DaoFactory;
 import model.dao.MediaDao;
+import model.dao.MovieDao;
 import model.entities.Media;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MediaDaoJdbc implements MediaDao {
@@ -64,16 +67,69 @@ public class MediaDaoJdbc implements MediaDao {
 
     @Override
     public void deleteById(Integer id) {
-
+        PreparedStatement st = null;
+        try {
+            st = connection.prepareStatement("DELETE FROM tb_media " +
+                    "WHERE Id = ?");
+            st.setInt(1, id);
+            int result = st.executeUpdate();
+        }
+        catch (SQLException e){
+            throw new DbException(e.getMessage());
+        }
+        finally {
+            DB.closeStatement(st);
+        }
     }
 
     @Override
     public Media findById(Integer id) {
+        ResultSet rs = null;
+        PreparedStatement st = null;
+        try{
+            st = connection.prepareStatement("SELECT * FROM tb_media " +
+                    "WHERE Id = ?");
+            st.setInt(1, id);
+            rs = st.executeQuery();
+            MovieDao movieDao = DaoFactory.createMovieDao();
+            if (rs.next()){
+                Media media = new Media(rs.getString(2), movieDao.findById(rs.getInt(3)));
+                media.setId(rs.getInt(1));
+                return media;
+            }
+        }
+        catch (SQLException e){
+            throw new DbException(e.getMessage());
+        }
+        finally {
+            DB.closeStatement(st);
+            DB.closeResultSet(rs);
+        }
         return null;
     }
 
     @Override
     public List<Media> findAll() {
-        return null;
+        ResultSet rs = null;
+        PreparedStatement st = null;
+
+        try {
+            st = connection.prepareStatement("SELECT * FROM " +
+                    "tb_movie");
+            rs = st.executeQuery();
+            List<Media> media = new ArrayList<>();
+            MovieDao movieDao = DaoFactory.createMovieDao();
+
+            int i = 0;
+            while (rs.next()){
+                media.add(new Media(rs.getString(2), movieDao.findById(rs.getInt(3))));
+                media.get(i).setId(rs.getInt(1));
+                i++;
+            }
+            return media;
+        }
+        catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        }
     }
 }

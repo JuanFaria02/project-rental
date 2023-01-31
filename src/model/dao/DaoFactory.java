@@ -27,4 +27,8 @@ public class DaoFactory {
     public static MediaDaoJdbc createMediaDao(){
         return new MediaDaoJdbc(DB.getConnection());
     }
+
+    public static RentalDaoJdbc createRentalDao(){
+        return new RentalDaoJdbc(DB.getConnection());
+    }
 }

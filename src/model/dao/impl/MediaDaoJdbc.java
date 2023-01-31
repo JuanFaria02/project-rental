@@ -25,7 +25,7 @@ public class MediaDaoJdbc implements MediaDao {
         ResultSet rs = null;
 
         try{
-            st = connection.prepareStatement("INSERT INTO tb_media (cod_bar, Id_movie) " +
+            st = connection.prepareStatement("INSERT INTO tb_media (cod_bar, id_movie) " +
                     "VALUES " +
                     "(?, ?)", st.RETURN_GENERATED_KEYS);
             st.setString(1, obj.getCodeBar());

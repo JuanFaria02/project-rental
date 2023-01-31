@@ -2,33 +2,39 @@ package model.dao.impl;
 
 import db.DB;
 import db.DbException;
-import model.dao.ClientDao;
 import model.dao.DaoFactory;
+import model.dao.MediaDao;
+import model.dao.RentalDao;
 import model.entities.Client;
+import model.entities.Movie;
+import model.entities.Rental;
 
 import java.sql.*;
+
 import java.util.ArrayList;
+
 import java.util.List;
 
-public class ClientDaoJdbc implements ClientDao {
+public class RentalDaoJdbc implements RentalDao {
 
-    private Connection connection;
+    Connection connection = null;
 
-    public ClientDaoJdbc(Connection connection) {
+    public RentalDaoJdbc(Connection connection) {
         this.connection = connection;
     }
 
     @Override
-    public void insert(Client obj) {
+    public void insert(Rental obj) {
         PreparedStatement st = null;
         ResultSet rs = null;
 
         try{
-            st = connection.prepareStatement("INSERT INTO tb_client (name, cpf) " +
+            st = connection.prepareStatement("INSERT INTO tb_rental (moment, id_media, id_client) " +
                     "VALUES " +
-                    "(?, ?)", st.RETURN_GENERATED_KEYS);
-            st.setString(1, obj.getCpf());
-            st.setString(2, obj.getName());
+                    "(?, ?, ?)", st.RETURN_GENERATED_KEYS);
+            st.setDate(1, new java.sql.Date(obj.getMoment().getTime()));
+            st.setInt(2, obj.getMedia().getId());
+            st.setInt(3, obj.getClient().getId());
             int result = st.executeUpdate();
             rs = st.getGeneratedKeys();
             if (rs.next()){
@@ -45,15 +51,16 @@ public class ClientDaoJdbc implements ClientDao {
     }
 
     @Override
-    public void update(Client obj) {
+    public void update(Rental obj) {
         PreparedStatement st = null;
         try{
-            st = connection.prepareStatement("UPDATE tb_client " +
-                    "SET Cpf = ?, Name = ? " +
+            st = connection.prepareStatement("UPDATE tb_rental " +
+                    "SET moment = ?, id_media = ?, id_client = ? " +
                     "WHERE Id = ?");
-            st.setString(1, obj.getCpf());
-            st.setString(2, obj.getName());
-            st.setInt(3, obj.getId());
+            st.setDate(1, new java.sql.Date(obj.getMoment().getTime()));
+            st.setInt(2, obj.getMedia().getId());
+            st.setInt(3, obj.getClient().getId());
+            st.setInt(4, obj.getId());
             st.executeUpdate();
         }
         catch (SQLException e){
@@ -68,7 +75,7 @@ public class ClientDaoJdbc implements ClientDao {
     public void deleteById(Integer id) {
         PreparedStatement st = null;
         try {
-            st = connection.prepareStatement("DELETE FROM tb_client " +
+            st = connection.prepareStatement("DELETE FROM tb_rental " +
                     "WHERE Id = ?");
             st.setInt(1, id);
             int result = st.executeUpdate();
@@ -82,18 +89,21 @@ public class ClientDaoJdbc implements ClientDao {
     }
 
     @Override
-    public Client findById(Integer id) {
+    public Rental findById(Integer id) {
         ResultSet rs = null;
         PreparedStatement st = null;
         try{
-            st = connection.prepareStatement("SELECT * FROM tb_client " +
-                    "WHERE Id = ?");
+            st = connection.prepareStatement("SELECT * FROM tb_rental " +
+                    "WHERE id = ?");
             st.setInt(1, id);
             rs = st.executeQuery();
             if (rs.next()){
-                Client client = new Client(rs.getString(2), rs.getString(3));
-                client.setId(rs.getInt(1));
-                return client;
+                Rental rental = new Rental(DaoFactory.createMediaDao().findById(rs.getInt(3)),
+                        DaoFactory.createClientDao().findById(rs.getInt(4)),
+                        rs.getDate(2));
+                rental.setId(rs.getInt(1));
+
+                return rental;
             }
         }
         catch (SQLException e){
@@ -107,22 +117,25 @@ public class ClientDaoJdbc implements ClientDao {
     }
 
     @Override
-    public List<Client> findAll() {
+    public List<Rental> findAll() {
+
         ResultSet rs = null;
         PreparedStatement st = null;
 
         try {
             st = connection.prepareStatement("SELECT * FROM " +
-                    "tb_client");
+                    "tb_rental");
             rs = st.executeQuery();
-            List<Client> clients = new ArrayList<>();
+            List<Rental> rentals = new ArrayList<>();
             int i = 0;
             while (rs.next()){
-                clients.add(new Client(rs.getString(2), rs.getString(3)));
-                clients.get(i).setId(rs.getInt(1));
+                rentals.add(new Rental(DaoFactory.createMediaDao().findById(rs.getInt(3))
+                        , DaoFactory.createClientDao().findById(rs.getInt(4)),
+                        rs.getDate(2)));
+                rentals.get(i).setId(rs.getInt(1));
                 i++;
             }
-            return clients;
+            return rentals;
         }
         catch (SQLException e) {
             throw new DbException(e.getMessage());

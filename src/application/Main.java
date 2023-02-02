@@ -1,24 +1,23 @@
 package application;
 
-import db.DB;
-import model.dao.*;
-import model.dao.impl.MediaDaoJdbc;
-import model.entities.*;
 
-import java.net.DatagramPacket;
-import java.sql.Connection;
-import java.sql.Date;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import db.DbException;
+import model.entities.Client;
+import resources.ClientResources;
+
+import java.sql.SQLException;
+
 
 public class Main {
     public static void main(String[] args) {
-        Date date = Date.valueOf(LocalDate.now());
+        ClientResources clientResources = new ClientResources();
+        try {
 
-        RentalDao rentalDao = DaoFactory.createRentalDao();
 
-        List<Rental> rentals = rentalDao.findAll();
-        rentals.forEach(System.out::println);
+            System.out.println(clientResources.findByCpf("1313411345"));
+        }
+        catch (DbException e) {
+            System.out.println(e.getMessage());
+        }
     }
 }

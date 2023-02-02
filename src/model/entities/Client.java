@@ -12,7 +12,7 @@ public class Client implements Serializable {
     public Client(){
     }
 
-    public Client(String cpf, String name) {
+    public Client(String name, String cpf) {
         this.cpf = cpf;
         this.name = name;
     }

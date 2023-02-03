@@ -3,6 +3,7 @@ package model.dao.impl;
 import db.DB;
 import db.DbException;
 import model.dao.MovieDao;
+import model.entities.Client;
 import model.entities.Movie;
 
 import java.sql.*;
@@ -17,11 +18,12 @@ public class MovieDaoJdbc implements MovieDao {
 
 
     @Override
-    public void insert(Movie obj) {
+    public Movie insert(Movie obj) {
         PreparedStatement st = null;
         ResultSet rs = null;
 
         try{
+            connection.setAutoCommit(false);
             st = connection.prepareStatement("INSERT INTO tb_movie (tittle, director_name) " +
                     "VALUES " +
                     "(?, ?)", st.RETURN_GENERATED_KEYS);
@@ -32,20 +34,32 @@ public class MovieDaoJdbc implements MovieDao {
             if (rs.next()){
                 obj.setId(rs.getInt(1));
             }
+            connection.commit();
         }
         catch (SQLException e){
-            throw new DbException(e.getMessage());
+            try {
+                connection.rollback();
+                throw new DbException("Transaction rolled back! Caused by: " + e.getMessage());
+
+            }
+            catch (SQLException e1) {
+                throw new DbException("Error trying to rollback! Caused by: " + e1.getMessage());
+            }
         }
         finally {
             DB.closeStatement(st);
-            DB.closeResultSet(rs);
+            if (rs != null) {
+                DB.closeResultSet(rs);
+            }
         }
+        return obj;
     }
 
     @Override
-    public void update(Movie obj) {
+    public Movie update(Movie obj) {
         PreparedStatement st = null;
         try{
+            connection.setAutoCommit(false);
             st = connection.prepareStatement("UPDATE tb_movie " +
                     "SET tittle = ?, director_name = ? " +
                     "WHERE Id = ?");
@@ -53,26 +67,43 @@ public class MovieDaoJdbc implements MovieDao {
             st.setString(2, obj.getDirector());
             st.setInt(3, obj.getId());
             st.executeUpdate();
+            connection.commit();
         }
         catch (SQLException e){
-            throw new DbException(e.getMessage());
+            try {
+                connection.rollback();
+                throw new DbException("Transaction rolled back! Caused by: " + e.getMessage());
+            }
+            catch (SQLException e1) {
+                throw new DbException("Error trying to rollback! Caused by: " + e1.getMessage());
+            }
         }
         finally {
             DB.closeStatement(st);
         }
+        return obj;
     }
 
     @Override
     public void deleteById(Integer id) {
         PreparedStatement st = null;
         try {
+            connection.setAutoCommit(false);
             st = connection.prepareStatement("DELETE FROM tb_movie " +
                     "WHERE Id = ?");
             st.setInt(1, id);
             int result = st.executeUpdate();
+            connection.commit();
         }
         catch (SQLException e){
-            throw new DbException(e.getMessage());
+            try {
+                connection.rollback();
+                throw new DbException("Transaction rolled back! Caused by: " + e.getMessage());
+            }
+            catch (SQLException e1) {
+                throw new DbException("Error trying to rollback! Caused by: " + e1.getMessage());
+            }
+
         }
         finally {
             DB.closeStatement(st);
@@ -99,7 +130,9 @@ public class MovieDaoJdbc implements MovieDao {
         }
         finally {
             DB.closeStatement(st);
-            DB.closeResultSet(rs);
+            if (rs != null) {
+                DB.closeResultSet(rs);
+            }
         }
         return null;
     }
@@ -124,6 +157,34 @@ public class MovieDaoJdbc implements MovieDao {
         }
         catch (SQLException e) {
             throw new DbException(e.getMessage());
+        }
+    }
+
+    @Override
+    public List<Movie> findByDirector(String name) {
+        ResultSet rs = null;
+        PreparedStatement st = null;
+        try{
+            st = connection.prepareStatement("SELECT * FROM tb_movie " +
+                    "WHERE director_name = ?");
+            st.setString(1, name);
+            rs = st.executeQuery();
+            List<Movie> movieList = new ArrayList<>();
+            while (rs.next()){
+                Movie movie = new Movie(rs.getString(2), rs.getString(3));
+                movie.setId(rs.getInt(1));
+                movieList.add(movie);
+            }
+            return movieList;
+        }
+        catch (SQLException e){
+            throw new DbException(e.getMessage());
+        }
+        finally {
+            DB.closeStatement(st);
+            if (rs != null) {
+                DB.closeResultSet(rs);
+            }
         }
     }
 

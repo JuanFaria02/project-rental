@@ -76,10 +76,10 @@ public class ClientDaoJdbc implements ClientDao {
         catch (SQLException e){
             try {
                 connection.rollback();
-                throw new DbException("Error: " + e.getMessage());
+                throw new DbException("Transaction rolled back! Caused by: " + e.getMessage());
             }
             catch (SQLException e1) {
-                throw new DbException("Error: " + e1.getMessage());
+                throw new DbException("Error trying to rollback! Caused by: " + e1.getMessage());
             }
         }
         finally {
@@ -102,10 +102,10 @@ public class ClientDaoJdbc implements ClientDao {
         catch (SQLException e){
             try {
                 connection.rollback();
-                throw new DbException("Error: " + e.getMessage());
+                throw new DbException("Transaction rolled back! Caused by: " + e.getMessage());
             }
             catch (SQLException e1) {
-                throw new DbException("Error: " + e1.getMessage());
+                throw new DbException("Error trying to rollback! Caused by: " + e1.getMessage());
             }
         }
         finally {
@@ -133,7 +133,9 @@ public class ClientDaoJdbc implements ClientDao {
         }
         finally {
             DB.closeStatement(st);
-            DB.closeResultSet(rs);
+            if (rs != null) {
+                DB.closeResultSet(rs);
+            }
         }
         return null;
     }
@@ -180,7 +182,9 @@ public class ClientDaoJdbc implements ClientDao {
         }
         finally {
             DB.closeStatement(st);
-            DB.closeResultSet(rs);
+            if (rs != null) {
+                DB.closeResultSet(rs);
+            }
         }
         return null;
     }

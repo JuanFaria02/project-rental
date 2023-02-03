@@ -3,21 +3,20 @@ package application;
 
 import db.DbException;
 import model.entities.Client;
+import model.entities.Movie;
 import resources.ClientResources;
+import resources.MovieResources;
 
 import java.sql.SQLException;
+import java.util.List;
 
 
 public class Main {
     public static void main(String[] args) {
-        ClientResources clientResources = new ClientResources();
-        try {
+        MovieResources movieResources = new MovieResources();
 
 
-            System.out.println(clientResources.findByCpf("1313411345"));
-        }
-        catch (DbException e) {
-            System.out.println(e.getMessage());
-        }
+        System.out.println(movieResources.findByDirector("Josh"));
+
     }
 }

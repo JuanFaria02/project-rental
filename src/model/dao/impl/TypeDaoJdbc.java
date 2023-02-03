@@ -19,7 +19,7 @@ public class TypeDaoJdbc implements TypeDao {
         this.connection = connection;
     }
     @Override
-    public void insert(Type obj) {
+    public Type insert(Type obj) {
         PreparedStatement st = null;
         ResultSet rs = null;
 
@@ -39,12 +39,15 @@ public class TypeDaoJdbc implements TypeDao {
         }
         finally {
             DB.closeStatement(st);
-            DB.closeResultSet(rs);
+            if (rs != null) {
+                DB.closeResultSet(rs);
+            }
         }
+        return obj;
     }
 
     @Override
-    public void update(Type obj) {
+    public Type update(Type obj) {
         PreparedStatement st = null;
         try{
             st = connection.prepareStatement("UPDATE tb_type " +
@@ -60,6 +63,7 @@ public class TypeDaoJdbc implements TypeDao {
         finally {
             DB.closeStatement(st);
         }
+        return obj;
     }
 
     @Override
@@ -99,7 +103,9 @@ public class TypeDaoJdbc implements TypeDao {
         }
         finally {
             DB.closeStatement(st);
-            DB.closeResultSet(rs);
+            if (rs != null) {
+                DB.closeResultSet(rs);
+            }
         }
         return null;
     }
@@ -124,6 +130,41 @@ public class TypeDaoJdbc implements TypeDao {
         catch (SQLException e) {
             throw new DbException(e.getMessage());
         }
+    }
+    @Override
+    public Type findByName(String name) {
+        ResultSet rs = null;
+        PreparedStatement st = null;
+        try{
+            connection.setAutoCommit(false);
+            st = connection.prepareStatement("SELECT * FROM tb_type " +
+                    "WHERE name = ?");
+            st.setString(1, name);
+            rs = st.executeQuery();
+            if (rs.next()){
+                Type type = new Type(rs.getString(2));
+                type.setId(rs.getInt(1));
+                return type;
+            }
+            connection.commit();
+        }
+        catch (SQLException e){
+            try {
+                connection.rollback();
+                throw new DbException("Transaction rolled back. Caused by: " + e.getMessage());
+            }
+            catch (SQLException e1) {
+                throw new DbException("Error trying rolled back. Caused By: " + e1.getMessage());
+            }
+        }
+        finally {
+
+            DB.closeStatement(st);
+            if (rs != null) {
+                DB.closeResultSet(rs);
+            }
+        }
+        return null;
     }
 
 }

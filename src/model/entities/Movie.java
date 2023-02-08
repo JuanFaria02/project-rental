@@ -10,7 +10,7 @@ public class Movie {
     private String tittle;
     private String director;
 
-    Set<Type> types = new HashSet<>();
+
 
     public Movie(){
     }
@@ -43,9 +43,6 @@ public class Movie {
         this.director = director;
     }
 
-    public Set<Type> getTypes() {
-        return types;
-    }
 
     @Override
     public boolean equals(Object o) {

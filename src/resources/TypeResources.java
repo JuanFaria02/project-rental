@@ -1,7 +1,6 @@
 package resources;
 
 import com.google.gson.Gson;
-import model.entities.Movie;
 import model.entities.Type;
 import services.TypeServices;
 

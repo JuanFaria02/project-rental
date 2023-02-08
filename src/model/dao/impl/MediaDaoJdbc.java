@@ -20,11 +20,12 @@ public class MediaDaoJdbc implements MediaDao {
         this.connection = connection;
     }
     @Override
-    public void insert(Media obj) {
+    public Media insert(Media obj) {
         PreparedStatement st = null;
         ResultSet rs = null;
 
         try{
+            connection.setAutoCommit(false);
             st = connection.prepareStatement("INSERT INTO tb_media (cod_bar, id_movie) " +
                     "VALUES " +
                     "(?, ?)", st.RETURN_GENERATED_KEYS);
@@ -35,20 +36,31 @@ public class MediaDaoJdbc implements MediaDao {
             if (rs.next()){
                 obj.setId(rs.getInt(1));
             }
+            connection.commit();
         }
         catch (SQLException e){
-            throw new DbException(e.getMessage());
+            try {
+                connection.rollback();
+                throw new DbException("Transaction rolled back! Caused by: " + e.getMessage());
+            }
+            catch (SQLException e1) {
+                throw new DbException("Error trying to rollback! Caused by: " + e1.getMessage());
+            }
         }
         finally {
             DB.closeStatement(st);
-            DB.closeResultSet(rs);
+            if (rs != null) {
+                DB.closeResultSet(rs);
+            }
         }
+        return obj;
     }
 
     @Override
-    public void update(Media obj) {
+    public Media update(Media obj) {
         PreparedStatement st = null;
         try{
+            connection.setAutoCommit(false);
             st = connection.prepareStatement("UPDATE tb_media " +
                     "SET cod_bar = ?, Id_movie = ? " +
                     "WHERE Id = ?");
@@ -56,26 +68,42 @@ public class MediaDaoJdbc implements MediaDao {
             st.setInt(2, obj.getMovie().getId());
             st.setInt(3, obj.getId());
             st.executeUpdate();
+            connection.commit();
         }
         catch (SQLException e){
-            throw new DbException(e.getMessage());
+            try {
+                connection.rollback();
+                throw new DbException("Transaction rolled back! Caused by: " + e.getMessage());
+            }
+            catch (SQLException e1) {
+                throw new DbException("Error trying to rollback! Caused by: " + e1.getMessage());
+            }
         }
         finally {
             DB.closeStatement(st);
         }
+        return obj;
     }
 
     @Override
     public void deleteById(Integer id) {
         PreparedStatement st = null;
         try {
+            connection.setAutoCommit(false);
             st = connection.prepareStatement("DELETE FROM tb_media " +
                     "WHERE Id = ?");
             st.setInt(1, id);
             int result = st.executeUpdate();
+            connection.commit();
         }
         catch (SQLException e){
-            throw new DbException(e.getMessage());
+            try {
+                connection.rollback();
+                throw new DbException("Transaction rolled back! Caused by: " + e.getMessage());
+            }
+            catch (SQLException e1) {
+                throw new DbException("Error trying to rollback! Caused by: " + e1.getMessage());
+            }
         }
         finally {
             DB.closeStatement(st);
@@ -103,7 +131,9 @@ public class MediaDaoJdbc implements MediaDao {
         }
         finally {
             DB.closeStatement(st);
-            DB.closeResultSet(rs);
+            if (rs != null) {
+                DB.closeResultSet(rs);
+            }
         }
         return null;
     }
@@ -115,7 +145,7 @@ public class MediaDaoJdbc implements MediaDao {
 
         try {
             st = connection.prepareStatement("SELECT * FROM " +
-                    "tb_movie");
+                    "tb_media");
             rs = st.executeQuery();
             List<Media> media = new ArrayList<>();
             MovieDao movieDao = DaoFactory.createMovieDao();

@@ -6,9 +6,11 @@ import model.entities.MovieType;
 import java.util.List;
 
 public interface MovieTypeDao {
-    void insert(MovieType obj);
-    void update(MovieType obj);
+    MovieType insert(MovieType obj);
+    MovieType update(MovieType obj);
     void deleteById(Integer id);
     MovieType findById(Integer id);
     List<MovieType> findAll();
+    MovieType findByName(String name);
+
 }

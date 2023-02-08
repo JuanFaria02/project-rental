@@ -23,12 +23,12 @@ public class MovieTypeDaoJdbc implements MovieTypeDao {
         this.connection = connection;
     }
     @Override
-    public void insert(MovieType obj) {
+    public MovieType insert(MovieType obj) {
         PreparedStatement st = null;
         ResultSet rs = null;
 
         try{
-            st = connection.prepareStatement("INSERT INTO tb_movie_type (Id_movie, Id_type) " +
+            st = connection.prepareStatement("INSERT INTO tb_movie_type (id_movie, id_type) " +
                     "VALUES " +
                     "(?, ?)", st.RETURN_GENERATED_KEYS);
             st.setInt(1, obj.getMovie().getId());
@@ -46,15 +46,16 @@ public class MovieTypeDaoJdbc implements MovieTypeDao {
             DB.closeStatement(st);
             DB.closeResultSet(rs);
         }
+        return obj;
     }
 
     @Override
-    public void update(MovieType obj) {
+    public MovieType update(MovieType obj) {
         PreparedStatement st = null;
         try{
             st = connection.prepareStatement("UPDATE tb_movie_type " +
-                    "SET Id_movie = ?, Id_type = ? " +
-                    "WHERE Id = ?");
+                    "SET id_movie = ?, id_type = ? " +
+                    "WHERE id = ?");
             st.setInt(1, obj.getMovie().getId());
             st.setInt(2, obj.getType().getId());
             st.setInt(3, obj.getId());
@@ -66,6 +67,7 @@ public class MovieTypeDaoJdbc implements MovieTypeDao {
         finally {
             DB.closeStatement(st);
         }
+        return obj;
     }
 
     @Override
@@ -73,7 +75,7 @@ public class MovieTypeDaoJdbc implements MovieTypeDao {
         PreparedStatement st = null;
         try {
             st = connection.prepareStatement("DELETE FROM tb_movie_type " +
-                    "WHERE Id = ?");
+                    "WHERE id = ?");
             st.setInt(1, id);
             int result = st.executeUpdate();
         }
@@ -91,7 +93,7 @@ public class MovieTypeDaoJdbc implements MovieTypeDao {
         PreparedStatement st = null;
         try{
             st = connection.prepareStatement("SELECT * FROM tb_movie_type " +
-                    "WHERE Id = ?");
+                    "WHERE id = ?");
             st.setInt(1, id);
             rs = st.executeQuery();
 
@@ -137,5 +139,45 @@ public class MovieTypeDaoJdbc implements MovieTypeDao {
         catch (SQLException e) {
             throw new DbException(e.getMessage());
         }
+    }
+
+    @Override
+    public MovieType findByName(String name) {
+        ResultSet rs = null;
+        PreparedStatement st = null;
+        try{
+            connection.setAutoCommit(false);
+            st = connection.prepareStatement("select tb_movie_type.id_movie, tb_movie_type.id_type " +
+                    "from tb_movie_type inner join tb_movie on tb_movie_type.id_movie = tb_movie.id " +
+                    "where tb_movie.tittle = ?");
+
+            st.setString(1, name);
+            rs = st.executeQuery();
+            if (rs.next()){
+                MovieType movieType = new MovieType(DaoFactory.createMovieDao().findById(rs.getInt(1)),
+                        DaoFactory.createTypeDao().findById(rs.getInt(2)));
+
+                movieType.setId(rs.getInt(1));
+                return movieType;
+            }
+            connection.commit();
+        }
+        catch (SQLException e){
+            try {
+                connection.rollback();
+                throw new DbException("Transaction rolled back. Caused by: " + e.getMessage());
+            }
+            catch (SQLException e1) {
+                throw new DbException("Error trying rolled back. Caused By: " + e1.getMessage());
+            }
+        }
+        finally {
+
+            DB.closeStatement(st);
+            if (rs != null) {
+                DB.closeResultSet(rs);
+            }
+        }
+        return null;
     }
 }

@@ -66,7 +66,7 @@ public class ClientDaoJdbc implements ClientDao {
             connection.setAutoCommit(false);
             st = connection.prepareStatement("UPDATE tb_client " +
                     "SET Cpf = ?, Name = ? " +
-                    "WHERE Id = ?");
+                    "WHERE id = ?");
             st.setString(1, obj.getCpf());
             st.setString(2, obj.getName());
             st.setInt(3, obj.getId());

@@ -2,7 +2,7 @@ package model.entities;
 
 
 import java.io.Serializable;
-import java.util.Objects;
+import java.util.*;
 
 public class Client implements Serializable {
     private Integer id;
@@ -13,6 +13,10 @@ public class Client implements Serializable {
     }
 
     public Client(String name, String cpf) {
+      if (!isValid(cpf)) {
+            throw new InputMismatchException("CPF invalid!");
+      }
+
         this.cpf = cpf;
         this.name = name;
     }
@@ -49,6 +53,36 @@ public class Client implements Serializable {
         return Objects.equals(id, client.id) && Objects.equals(name, client.name);
     }
 
+
+    private boolean isValid(String cpf) {
+        List<Integer> cpfList = Arrays.asList(cpf.split(""))
+                .stream()
+                .map(n -> Integer.valueOf(n))
+                .toList();
+
+
+        int firstDigit = getDigit(cpfList, 10, 2);;
+        int secondDigit = getDigit(cpfList, 11, 1);
+
+        return firstDigit == cpfList.get(cpfList.size()-2) && secondDigit == cpfList.get(cpfList.size()-1);
+    }
+
+
+    private Integer getDigit(List<Integer> cpf, Integer temp, Integer sizeCutCpf) {
+        Integer sumDigit = 0;
+        for (int i = 0; i < cpf.size()-sizeCutCpf; i++) {
+            sumDigit += cpf.get(i) * temp;
+            temp--;
+        }
+        int digit = (sumDigit * 10) % 11;
+
+        if (digit == 10) {
+            digit = 0;
+        }
+        return digit;
+    }
+
+
     @Override
     public int hashCode() {
         return Objects.hash(id, name);
@@ -58,8 +92,8 @@ public class Client implements Serializable {
     public String toString() {
         return "Client{" +
                 "id=" + id +
-                ", cpf='" + cpf + '\'' +
                 ", name='" + name + '\'' +
+                ", cpf='" + cpf + '\'' +
                 '}';
     }
 }

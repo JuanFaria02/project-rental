@@ -10,7 +10,7 @@ public class Movie {
     private String tittle;
     private String director;
 
-
+    Set<Type> typeSet = new HashSet<>();
 
     public Movie(){
     }
@@ -41,6 +41,10 @@ public class Movie {
 
     public void setDirector(String director) {
         this.director = director;
+    }
+
+    public Set<Type> getTypeSet() {
+        return typeSet;
     }
 
 

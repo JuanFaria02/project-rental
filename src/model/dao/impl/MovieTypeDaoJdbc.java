@@ -28,6 +28,7 @@ public class MovieTypeDaoJdbc implements MovieTypeDao {
         ResultSet rs = null;
 
         try{
+            connection.setAutoCommit(false);
             st = connection.prepareStatement("INSERT INTO tb_movie_type (id_movie, id_type) " +
                     "VALUES " +
                     "(?, ?)", st.RETURN_GENERATED_KEYS);
@@ -38,13 +39,22 @@ public class MovieTypeDaoJdbc implements MovieTypeDao {
             if (rs.next()){
                 obj.setId(rs.getInt(1));
             }
+            connection.commit();
         }
         catch (SQLException e){
-            throw new DbException(e.getMessage());
+            try {
+                connection.rollback();
+                throw new DbException("Transaction rolled back! Caused by: " + e.getMessage());
+            }
+            catch (SQLException e1) {
+                throw new DbException("Error trying to rollback! Caused by: " + e1.getMessage());
+            }
         }
         finally {
             DB.closeStatement(st);
-            DB.closeResultSet(rs);
+            if (rs != null) {
+                DB.closeResultSet(rs);
+            }
         }
         return obj;
     }
@@ -53,6 +63,7 @@ public class MovieTypeDaoJdbc implements MovieTypeDao {
     public MovieType update(MovieType obj) {
         PreparedStatement st = null;
         try{
+            connection.setAutoCommit(false);
             st = connection.prepareStatement("UPDATE tb_movie_type " +
                     "SET id_movie = ?, id_type = ? " +
                     "WHERE id = ?");
@@ -60,9 +71,16 @@ public class MovieTypeDaoJdbc implements MovieTypeDao {
             st.setInt(2, obj.getType().getId());
             st.setInt(3, obj.getId());
             st.executeUpdate();
+            connection.commit();
         }
         catch (SQLException e){
-            throw new DbException(e.getMessage());
+            try {
+                connection.rollback();
+                throw new DbException("Transaction rolled back! Caused by: " + e.getMessage());
+            }
+            catch (SQLException e1) {
+                throw new DbException("Error trying to rollback! Caused by: " + e1.getMessage());
+            }
         }
         finally {
             DB.closeStatement(st);
@@ -71,16 +89,25 @@ public class MovieTypeDaoJdbc implements MovieTypeDao {
     }
 
     @Override
-    public void deleteById(Integer id) {
+    public void deleteByIdMovie(Integer id) {
         PreparedStatement st = null;
         try {
+            connection.setAutoCommit(false);
             st = connection.prepareStatement("DELETE FROM tb_movie_type " +
-                    "WHERE id = ?");
+                    "WHERE id_movie = ?");
             st.setInt(1, id);
             int result = st.executeUpdate();
+            connection.commit();
         }
         catch (SQLException e){
-            throw new DbException(e.getMessage());
+            try {
+                connection.rollback();
+                throw new DbException("Transaction rolled back! Caused by: " + e.getMessage());
+            }
+            catch (SQLException e1) {
+                throw new DbException("Error trying to rollback! Caused by: " + e1.getMessage());
+            }
+
         }
         finally {
             DB.closeStatement(st);
@@ -113,7 +140,10 @@ public class MovieTypeDaoJdbc implements MovieTypeDao {
         }
         finally {
             DB.closeStatement(st);
-            DB.closeResultSet(rs);
+            if (rs != null) {
+                DB.closeResultSet(rs);
+            }
+
         }
         return null;
     }
@@ -142,34 +172,39 @@ public class MovieTypeDaoJdbc implements MovieTypeDao {
     }
 
     @Override
-    public MovieType findByName(String name) {
+    public List<MovieType> findByName(String name) {
         ResultSet rs = null;
         PreparedStatement st = null;
         try{
-            connection.setAutoCommit(false);
-            st = connection.prepareStatement("select tb_movie_type.id_movie, tb_movie_type.id_type " +
+
+            st = connection.prepareStatement("select tb_movie_type.id, tb_movie_type.id_movie, tb_movie_type.id_type " +
                     "from tb_movie_type inner join tb_movie on tb_movie_type.id_movie = tb_movie.id " +
                     "where tb_movie.tittle = ?");
 
             st.setString(1, name);
             rs = st.executeQuery();
-            if (rs.next()){
-                MovieType movieType = new MovieType(DaoFactory.createMovieDao().findById(rs.getInt(1)),
-                        DaoFactory.createTypeDao().findById(rs.getInt(2)));
+
+            List<MovieType> movieTypeList = new ArrayList<>();
+
+            int i = 0;
+
+            while (rs.next()){
+                Movie movie = DaoFactory.createMovieDao().findById(rs.getInt(2));
+                MovieType movieType = new MovieType(movie,
+                        DaoFactory.createTypeDao().findById(rs.getInt(3)));
+
+                movie.getTypeSet().add(DaoFactory.createTypeDao().findById(rs.getInt(3)));
 
                 movieType.setId(rs.getInt(1));
-                return movieType;
+                movieTypeList.add(movieType);
+                i++;
             }
-            connection.commit();
+
+
+            return movieTypeList;
         }
         catch (SQLException e){
-            try {
-                connection.rollback();
                 throw new DbException("Transaction rolled back. Caused by: " + e.getMessage());
-            }
-            catch (SQLException e1) {
-                throw new DbException("Error trying rolled back. Caused By: " + e1.getMessage());
-            }
         }
         finally {
 
@@ -178,6 +213,5 @@ public class MovieTypeDaoJdbc implements MovieTypeDao {
                 DB.closeResultSet(rs);
             }
         }
-        return null;
     }
 }

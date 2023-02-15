@@ -8,9 +8,11 @@ import java.util.List;
 public interface MovieTypeDao {
     MovieType insert(MovieType obj);
     MovieType update(MovieType obj);
-    void deleteById(Integer id);
+    void deleteByIdMovie(Integer id);
+
     MovieType findById(Integer id);
+
     List<MovieType> findAll();
-    MovieType findByName(String name);
+    List<MovieType> findByName(String name);
 
 }

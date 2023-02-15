@@ -34,20 +34,19 @@ public class MovieTypeService {
         return movieTypeDao.update(obj);
     }
 
-    public boolean deleteById(Integer id) {
-        if (!checkIdExist(id)) {
-            throw new ServiceException("Id doesn't exist");
-        }
-        movieTypeDao.deleteById(id);
+    public boolean deleteByIdMovie(Integer id) {
+
+        movieTypeDao.deleteByIdMovie(id);
         return true;
     }
 
 
-    public MovieType findByName(String name) {
+    public List<MovieType> findByName(String name) {
         if (movieTypeDao.findByName(name) == null) {
             throw new ServiceException("Movie name doesn't exist");
         }
-        return movieTypeDao.findByName(name);
+        List<MovieType> movieTypeList = movieTypeDao.findByName(name);
+        return movieTypeList;
     }
 
 

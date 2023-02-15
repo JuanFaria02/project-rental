@@ -2,6 +2,10 @@ package application;
 
 
 
+import com.google.gson.Gson;
+import model.entities.Movie;
+import model.entities.MovieType;
+import model.entities.Type;
 import resources.*;
 import services.exception.ServiceException;
 
@@ -9,10 +13,15 @@ import java.sql.SQLException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+
+
 public class Main {
     public static void main(String[] args) {
+
         Scanner scan = new Scanner(System.in);
         try {
+
+
             UI.printHome();
 
             System.out.print("Choose one: ");

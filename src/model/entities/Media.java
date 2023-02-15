@@ -1,6 +1,8 @@
 package model.entities;
 
-import java.time.Instant;
+
+import java.util.Random;
+
 
 public class Media {
     private Integer id;
@@ -10,8 +12,8 @@ public class Media {
     public Media(){
     }
 
-    public Media(String codeBar, Movie movie) {
-        this.codeBar = codeBar;
+    public Media(Movie movie) {
+        this.codeBar = String.valueOf(generateCodeBar());
         this.movie = movie;
     }
 
@@ -39,6 +41,10 @@ public class Media {
         this.movie = movie;
     }
 
+    private Integer generateCodeBar() {
+        Random code = new Random();
+        return code.hashCode();
+    }
     @Override
     public String toString() {
         return "Media{" +

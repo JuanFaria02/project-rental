@@ -24,6 +24,7 @@ public class TypeDaoJdbc implements TypeDao {
         ResultSet rs = null;
 
         try{
+            connection.setAutoCommit(false);
             st = connection.prepareStatement("INSERT INTO tb_type (name) " +
                     "VALUES " +
                     "(?)", st.RETURN_GENERATED_KEYS);
@@ -33,9 +34,16 @@ public class TypeDaoJdbc implements TypeDao {
             if (rs.next()){
                 obj.setId(rs.getInt(1));
             }
+            connection.commit();
         }
         catch (SQLException e){
-            throw new DbException(e.getMessage());
+            try {
+                connection.rollback();
+                throw new DbException("Transaction rolled back! Caused by: " + e.getMessage());
+            }
+            catch (SQLException e1) {
+                throw new DbException("Error trying to rollback! Caused by: " + e1.getMessage());
+            }
         }
         finally {
             DB.closeStatement(st);
@@ -50,15 +58,23 @@ public class TypeDaoJdbc implements TypeDao {
     public Type update(Type obj) {
         PreparedStatement st = null;
         try{
+            connection.setAutoCommit(false);
             st = connection.prepareStatement("UPDATE tb_type " +
                     "SET name = ? " +
                     "WHERE Id = ?");
             st.setString(1, obj.getName());
             st.setInt(2, obj.getId());
             st.executeUpdate();
+            connection.commit();
         }
         catch (SQLException e){
-            throw new DbException(e.getMessage());
+            try {
+                connection.rollback();
+                throw new DbException("Transaction rolled back! Caused by: " + e.getMessage());
+            }
+            catch (SQLException e1) {
+                throw new DbException("Error trying to rollback! Caused by: " + e1.getMessage());
+            }
         }
         finally {
             DB.closeStatement(st);
@@ -70,13 +86,21 @@ public class TypeDaoJdbc implements TypeDao {
     public void deleteById(Integer id) {
         PreparedStatement st = null;
         try {
+            connection.setAutoCommit(false);
             st = connection.prepareStatement("DELETE FROM tb_type " +
                     "WHERE Id = ?");
             st.setInt(1, id);
             int result = st.executeUpdate();
+            connection.commit();
         }
         catch (SQLException e){
-            throw new DbException(e.getMessage());
+            try {
+                connection.rollback();
+                throw new DbException("Transaction rolled back! Caused by: " + e.getMessage());
+            }
+            catch (SQLException e1) {
+                throw new DbException("Error trying to rollback! Caused by: " + e1.getMessage());
+            }
         }
         finally {
             DB.closeStatement(st);

@@ -15,10 +15,9 @@ public class TypeResources {
         return typeJson;
     }
 
-    public String findById(Integer id){
+    public Type findById(Integer id){
         Type type = typeServices.findById(id);
-        String typeJson = new Gson().toJson(type);
-        return typeJson;
+        return type;
     }
 
     public String insert(Type obj) {

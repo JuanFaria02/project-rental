@@ -26,6 +26,7 @@ public class RentalDaoJdbc implements RentalDao {
         ResultSet rs = null;
 
         try{
+            connection.setAutoCommit(false);
             st = connection.prepareStatement("INSERT INTO tb_rental (moment, id_media, id_client) " +
                     "VALUES " +
                     "(?, ?, ?)", st.RETURN_GENERATED_KEYS);
@@ -37,13 +38,22 @@ public class RentalDaoJdbc implements RentalDao {
             if (rs.next()){
                 obj.setId(rs.getInt(1));
             }
+            connection.commit();
         }
         catch (SQLException e){
-            throw new DbException(e.getMessage());
+            try {
+                connection.rollback();
+                throw new DbException("Transaction rolled back! Caused by: " + e.getMessage());
+            }
+            catch (SQLException e1) {
+                throw new DbException("Error trying to rollback! Caused by: " + e1.getMessage());
+            }
         }
         finally {
             DB.closeStatement(st);
-            DB.closeResultSet(rs);
+            if (rs != null) {
+                DB.closeResultSet(rs);
+            }
         }
         return obj;
     }
@@ -52,6 +62,7 @@ public class RentalDaoJdbc implements RentalDao {
     public Rental update(Rental obj) {
         PreparedStatement st = null;
         try{
+            connection.setAutoCommit(false);
             st = connection.prepareStatement("UPDATE tb_rental " +
                     "SET moment = ?, id_media = ?, id_client = ? " +
                     "WHERE Id = ?");
@@ -60,9 +71,16 @@ public class RentalDaoJdbc implements RentalDao {
             st.setInt(3, obj.getClient().getId());
             st.setInt(4, obj.getId());
             st.executeUpdate();
+            connection.commit();
         }
         catch (SQLException e){
-            throw new DbException(e.getMessage());
+            try {
+                connection.rollback();
+                throw new DbException("Transaction rolled back! Caused by: " + e.getMessage());
+            }
+            catch (SQLException e1) {
+                throw new DbException("Error trying to rollback! Caused by: " + e1.getMessage());
+            }
         }
         finally {
             DB.closeStatement(st);
@@ -74,13 +92,21 @@ public class RentalDaoJdbc implements RentalDao {
     public void deleteById(Integer id) {
         PreparedStatement st = null;
         try {
+            connection.setAutoCommit(false);
             st = connection.prepareStatement("DELETE FROM tb_rental " +
                     "WHERE Id = ?");
             st.setInt(1, id);
             int result = st.executeUpdate();
+            connection.commit();
         }
         catch (SQLException e){
-            throw new DbException(e.getMessage());
+            try {
+                connection.rollback();
+                throw new DbException("Transaction rolled back! Caused by: " + e.getMessage());
+            }
+            catch (SQLException e1) {
+                throw new DbException("Error trying to rollback! Caused by: " + e1.getMessage());
+            }
         }
         finally {
             DB.closeStatement(st);
@@ -110,7 +136,9 @@ public class RentalDaoJdbc implements RentalDao {
         }
         finally {
             DB.closeStatement(st);
-            DB.closeResultSet(rs);
+            if (rs != null) {
+                DB.closeResultSet(rs);
+            }
         }
         return null;
     }

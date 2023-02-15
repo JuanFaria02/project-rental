@@ -29,7 +29,7 @@ public class MovieTypeResource {
     }
 
     public boolean deleteById(Integer id) {
-        return movieTypeService.deleteById(id);
+        return movieTypeService.deleteByIdMovie(id);
     }
 
     public String update(MovieType obj) {
@@ -39,7 +39,7 @@ public class MovieTypeResource {
     }
 
     public String findByName(String name) {
-        MovieType obj = movieTypeService.findByName(name);
+        List<MovieType> obj = movieTypeService.findByName(name);
         return new Gson().toJson(obj);
     }
 

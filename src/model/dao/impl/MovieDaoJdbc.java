@@ -2,9 +2,11 @@ package model.dao.impl;
 
 import db.DB;
 import db.DbException;
+import model.dao.DaoFactory;
 import model.dao.MovieDao;
 import model.entities.Client;
 import model.entities.Movie;
+import model.entities.MovieType;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -122,6 +124,12 @@ public class MovieDaoJdbc implements MovieDao {
             if (rs.next()){
                 Movie movie = new Movie(rs.getString(2), rs.getString(3));
                 movie.setId(rs.getInt(1));
+
+                for (MovieType t:
+                DaoFactory.createMovieTypeDao().findByName(movie.getTittle())) {
+                    movie.getTypeSet().add(t.getType());
+                }
+
                 return movie;
             }
         }
@@ -149,8 +157,15 @@ public class MovieDaoJdbc implements MovieDao {
             List<Movie> movies = new ArrayList<>();
             int i = 0;
             while (rs.next()){
-                movies.add(new Movie(rs.getString(2), rs.getString(3)));
-                movies.get(i).setId(rs.getInt(1));
+                Movie movie = new Movie(rs.getString(2), rs.getString(3));
+                movie.setId(rs.getInt(1));
+
+                for (MovieType t:
+                        DaoFactory.createMovieTypeDao().findByName(movie.getTittle())) {
+                    movie.getTypeSet().add(t.getType());
+                }
+
+                movies.add(movie);
                 i++;
             }
             return movies;
@@ -170,10 +185,17 @@ public class MovieDaoJdbc implements MovieDao {
             st.setString(1, name);
             rs = st.executeQuery();
             List<Movie> movieList = new ArrayList<>();
+
             while (rs.next()){
                 Movie movie = new Movie(rs.getString(2), rs.getString(3));
                 movie.setId(rs.getInt(1));
+                for (MovieType t:
+                        DaoFactory.createMovieTypeDao().findByName(movie.getTittle())) {
+                    movie.getTypeSet().add(t.getType());
+                }
+
                 movieList.add(movie);
+
             }
             return movieList;
         }

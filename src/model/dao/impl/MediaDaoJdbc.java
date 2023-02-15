@@ -121,7 +121,9 @@ public class MediaDaoJdbc implements MediaDao {
             rs = st.executeQuery();
             MovieDao movieDao = DaoFactory.createMovieDao();
             if (rs.next()){
-                Media media = new Media(rs.getString(2), movieDao.findById(rs.getInt(3)));
+                Media media = new Media();
+                media.setCodeBar(rs.getString(2));
+                media.setMovie(movieDao.findById(rs.getInt(3)));
                 media.setId(rs.getInt(1));
                 return media;
             }
@@ -147,16 +149,19 @@ public class MediaDaoJdbc implements MediaDao {
             st = connection.prepareStatement("SELECT * FROM " +
                     "tb_media");
             rs = st.executeQuery();
-            List<Media> media = new ArrayList<>();
+            List<Media> mediaList = new ArrayList<>();
             MovieDao movieDao = DaoFactory.createMovieDao();
 
             int i = 0;
             while (rs.next()){
-                media.add(new Media(rs.getString(2), movieDao.findById(rs.getInt(3))));
-                media.get(i).setId(rs.getInt(1));
+                Media media = new Media();
+                media.setCodeBar(rs.getString(2));
+                media.setMovie(movieDao.findById(rs.getInt(3)));
+                mediaList.add(media);
+                mediaList.get(i).setId(rs.getInt(1));
                 i++;
             }
-            return media;
+            return mediaList;
         }
         catch (SQLException e) {
             throw new DbException(e.getMessage());

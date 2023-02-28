@@ -4,7 +4,7 @@ package model.dao;
 import model.entities.Movie;
 
 import java.util.List;
-import java.util.MissingFormatArgumentException;
+
 
 public interface MovieDao {
     Movie insert(Movie obj);

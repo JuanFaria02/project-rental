@@ -88,7 +88,7 @@ public class TypeDaoJdbc implements TypeDao {
         try {
             connection.setAutoCommit(false);
             st = connection.prepareStatement("DELETE FROM tb_type " +
-                    "WHERE Id = ?");
+                    "WHERE id = ?");
             st.setInt(1, id);
             int result = st.executeUpdate();
             connection.commit();

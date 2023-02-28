@@ -49,7 +49,10 @@ public class MovieTypeService {
         return movieTypeList;
     }
 
-
+    public boolean deleteByIdType(Integer id) {
+        movieTypeDao.deleteByIdType(id);
+        return true;
+    }
     private boolean checkIdExist(Integer id) {
         List<MovieType> movieTypeList = movieTypeDao.findAll();
         for (MovieType t :

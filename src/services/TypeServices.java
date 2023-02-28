@@ -1,9 +1,9 @@
 package services;
 
 import model.dao.DaoFactory;
-import model.dao.MovieDao;
+
 import model.dao.TypeDao;
-import model.entities.Movie;
+
 import model.entities.Type;
 import services.exception.ServiceException;
 

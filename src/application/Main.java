@@ -2,14 +2,12 @@ package application;
 
 
 
-import com.google.gson.Gson;
-import model.entities.Movie;
-import model.entities.MovieType;
-import model.entities.Type;
-import resources.*;
+
+import db.DbException;
+
 import services.exception.ServiceException;
 
-import java.sql.SQLException;
+
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -20,6 +18,7 @@ public class Main {
 
         Scanner scan = new Scanner(System.in);
         try {
+
 
 
             UI.printHome();
@@ -59,6 +58,9 @@ public class Main {
         }
         catch (ServiceException e1){
             System.out.println(e1.getMessage());
+        }
+        catch (DbException e2) {
+            System.out.println(e2.getMessage());
         }
         finally {
             scan.close();

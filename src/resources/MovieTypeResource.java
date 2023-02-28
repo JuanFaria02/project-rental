@@ -5,6 +5,8 @@ import model.entities.MovieType;
 import services.MovieTypeService;
 
 
+
+import java.awt.*;
 import java.util.List;
 
 public class MovieTypeResource {
@@ -28,7 +30,7 @@ public class MovieTypeResource {
         return objJson;
     }
 
-    public boolean deleteById(Integer id) {
+    public boolean deleteByIdMovie(Integer id) {
         return movieTypeService.deleteByIdMovie(id);
     }
 
@@ -41,6 +43,10 @@ public class MovieTypeResource {
     public String findByName(String name) {
         List<MovieType> obj = movieTypeService.findByName(name);
         return new Gson().toJson(obj);
+    }
+
+    public boolean deleteByIdType(Integer id) {
+        return movieTypeService.deleteByIdType(id);
     }
 
 }

@@ -2,9 +2,9 @@ package model.dao;
 
 import db.DB;
 import model.dao.impl.*;
-import model.entities.MovieType;
 
-import java.sql.Connection;
+
+
 
 public class DaoFactory {
 

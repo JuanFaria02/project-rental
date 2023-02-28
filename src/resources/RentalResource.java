@@ -1,9 +1,9 @@
 package resources;
 
 import com.google.gson.Gson;
-import model.entities.Media;
+
 import model.entities.Rental;
-import services.MediaServices;
+
 import services.RentalService;
 
 import java.util.List;

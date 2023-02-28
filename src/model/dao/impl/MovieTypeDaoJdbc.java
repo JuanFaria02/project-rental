@@ -214,4 +214,115 @@ public class MovieTypeDaoJdbc implements MovieTypeDao {
             }
         }
     }
+
+    @Override
+    public List<MovieType> findByIdMovie(Integer id) {
+        ResultSet rs = null;
+        PreparedStatement st = null;
+        try{
+
+            st = connection.prepareStatement("SELECT tb_movie_type.id, tb_movie_type.id_type" +
+                    " FROM tb_movie_type " +
+                    "where tb_movie_type.id_movie = ?");
+
+            st.setInt(1, id);
+            rs = st.executeQuery();
+
+            List<MovieType> movieTypeList = new ArrayList<>();
+
+            int i = 0;
+            Movie movie = DaoFactory.createMovieDao().findById(id);
+            while (rs.next()){
+
+                MovieType movieType = new MovieType(movie,
+                        DaoFactory.createTypeDao().findById(rs.getInt(3)));
+
+                movie.getTypeSet().add(DaoFactory.createTypeDao().findById(rs.getInt(3)));
+
+                movieType.setId(rs.getInt(1));
+                movieTypeList.add(movieType);
+                i++;
+            }
+
+
+            return movieTypeList;
+        }
+        catch (SQLException e){
+            throw new DbException("Transaction rolled back. Caused by: " + e.getMessage());
+        }
+        finally {
+
+            DB.closeStatement(st);
+            if (rs != null) {
+                DB.closeResultSet(rs);
+            }
+        }
+    }
+
+    @Override
+    public List<Type> findTypeMovieByIdMovie(Integer idMovie) {
+        ResultSet rs = null;
+        PreparedStatement st = null;
+        try{
+
+            st = connection.prepareStatement("SELECT tb_movie_type.id_type" +
+                    " FROM tb_movie_type " +
+                    "where tb_movie_type.id_movie = ?");
+
+            st.setInt(1, idMovie);
+            rs = st.executeQuery();
+
+            List<Type> typeList = new ArrayList<>();
+
+            int i = 0;
+
+            while (rs.next()){
+
+                Type type = DaoFactory.createTypeDao().findById(rs.getInt(1));
+                typeList.add(type);
+                i++;
+            }
+
+
+            return typeList;
+        }
+        catch (SQLException e){
+            throw new DbException("Transaction rolled back. Caused by: " + e.getMessage());
+        }
+        finally {
+
+            DB.closeStatement(st);
+            if (rs != null) {
+                DB.closeResultSet(rs);
+            }
+        }
+    }
+
+    @Override
+    public void deleteByIdType(Integer id) {
+        PreparedStatement st = null;
+        try {
+            connection.setAutoCommit(false);
+            st = connection.prepareStatement("DELETE FROM tb_movie_type " +
+                    "WHERE id_type = ?");
+            st.setInt(1, id);
+            int result = st.executeUpdate();
+            connection.commit();
+        }
+        catch (SQLException e){
+            try {
+                connection.rollback();
+                throw new DbException("Transaction rolled back! Caused by: " + e.getMessage());
+            }
+            catch (SQLException e1) {
+                throw new DbException("Error trying to rollback! Caused by: " + e1.getMessage());
+            }
+
+        }
+        finally {
+            DB.closeStatement(st);
+        }
+    }
+
+
 }

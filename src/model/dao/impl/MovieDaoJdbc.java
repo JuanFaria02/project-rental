@@ -4,9 +4,9 @@ import db.DB;
 import db.DbException;
 import model.dao.DaoFactory;
 import model.dao.MovieDao;
-import model.entities.Client;
 import model.entities.Movie;
 import model.entities.MovieType;
+import model.entities.Type;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -124,12 +124,7 @@ public class MovieDaoJdbc implements MovieDao {
             if (rs.next()){
                 Movie movie = new Movie(rs.getString(2), rs.getString(3));
                 movie.setId(rs.getInt(1));
-
-                for (MovieType t:
-                DaoFactory.createMovieTypeDao().findByName(movie.getTittle())) {
-                    movie.getTypeSet().add(t.getType());
-                }
-
+                addTypesByIdMovie(movie);
                 return movie;
             }
         }
@@ -157,13 +152,11 @@ public class MovieDaoJdbc implements MovieDao {
             List<Movie> movies = new ArrayList<>();
             int i = 0;
             while (rs.next()){
+
+
                 Movie movie = new Movie(rs.getString(2), rs.getString(3));
                 movie.setId(rs.getInt(1));
-
-                for (MovieType t:
-                        DaoFactory.createMovieTypeDao().findByName(movie.getTittle())) {
-                    movie.getTypeSet().add(t.getType());
-                }
+                addTypes(movie, rs.getString(2));
 
                 movies.add(movie);
                 i++;
@@ -189,6 +182,7 @@ public class MovieDaoJdbc implements MovieDao {
             while (rs.next()){
                 Movie movie = new Movie(rs.getString(2), rs.getString(3));
                 movie.setId(rs.getInt(1));
+
                 for (MovieType t:
                         DaoFactory.createMovieTypeDao().findByName(movie.getTittle())) {
                     movie.getTypeSet().add(t.getType());
@@ -210,4 +204,21 @@ public class MovieDaoJdbc implements MovieDao {
         }
     }
 
+    private void addTypes(Movie movie, String name) {
+        List<MovieType> movieTypes = DaoFactory.createMovieTypeDao().findByName(name);
+        for (MovieType m : movieTypes) {
+            movie.getTypeSet().add(m.getType());
+        }
+
+    }
+
+    private void addTypesByIdMovie(Movie movie) {
+
+        List<Type> movieTypes = DaoFactory.createMovieTypeDao().findTypeMovieByIdMovie(movie.getId());
+
+        for (Type mt:
+             movieTypes) {
+            movie.getTypeSet().add(mt);
+        }
+    }
 }
